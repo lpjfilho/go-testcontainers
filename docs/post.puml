@@ -1,0 +1,27 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+AddRelTag("async", $lineStyle = DashedLine())
+
+!define DEVICONS https://raw.githubusercontent.com/tupadr3/plantuml-icon-font-sprites/master/devicons
+!define FONTAWESOME https://raw.githubusercontent.com/tupadr3/plantuml-icon-font-sprites/master/font-awesome-5
+!include DEVICONS/go.puml
+
+SHOW_PERSON_PORTRAIT()
+LAYOUT_LEFT_RIGHT()
+
+title "Post diagram"
+
+Person(user, "User", "System User")
+
+Container(api, "API", "Go", "Post api", $sprite="go")
+ContainerQueue(rabbitmq, "RabbitMQ", "Message Broker", "Save JSON message with post data")
+Container(consumer, "Consumer", "Go", "App", $sprite="go")
+ContainerDb(db, "Database", "Postgres")
+
+Rel(user, api, "1 - Request create post", "HTTPS")
+Rel(api, rabbitmq, "2 - Publish", "JSON/AMQP", $tags="async")
+Rel(consumer, rabbitmq, "3 - Pull", "JSON/AMQP", $tags="async")
+Rel(consumer, db, "4 - Save and get post", "DB/SQL")
+
+@enduml
